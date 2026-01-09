@@ -6,51 +6,6 @@ path_df <- paste0("Data/Medi_D_Data.csv")
 path_xwalk <- paste0("Data/Medi_D_Xwalk.csv")
 # path_save <- paste0()
 
-# Classification Map ------------------------------------------------------
-
-classification_map <- list(
-  Anesthesiology = c("anesthesia", "sedation", "analgesia", "perioperative", "anesthetic"),
-  Cardiology = c("cardio", "heart", "arrhythmia", "hypertension", "bp",
-                 "cholesterol", "lipid", "statin", "vascular"),
-  Dermatology = c("derma", "skin", "acne", "psoriasis", "eczema", "rash",
-                  "alopecia", 'isotretinoin','retinoid', 'psoriasis', 'dermatitis',
-                  'rosacea', 'fungal skin infection', 'onychomycosis'),
-  Endocrinology = c("diabetes", 'diabetic', "hyperglycemia", "hypoglycemia", "thyroid", "weight", "obesity", "endocrine"),
-  Gastroenterology = c("gastro", "liver", "hepatic", "gi ", "crohn", "ulcer", "ibs", "colitis"),
-  Hematology = c("blood", "anemia", "coagulation", "clotting", "hematologic"),
-  Hospital_Medicine = c("critical care", "icu", "life support", "sepsis", "shock"),
-  Infectious_Disease = c("infection", "antibiotic", "virus", "viral", "bacterial",
-                         "fungal", "antifungal", "hiv", "hepatitis",
-                         'antiretroviral', 'tuberculosis','\\btb\\b', 'parasitic',
-                         'malaria','helminth','antiparasitic'),
-  Neurology = c("neuro", "seizure", "epilepsy", "migraine", "neuropathy", "parkinson", "multiple sclerosis"),
-  Obstetrics = c("pregnancy", "postpartum", "obstetric", "fertility", "ivf"),
-  Oncology = c("cancer", "tumor", "chemotherapy", "oncology"),
-  Ophthalmology = c("eye", "ocular", "glaucoma", "ophthal"),
-  Orthopedics = c("bone", "joint", "arthritis", "fracture", "musculoskeletal"),
-  Pain_Management = c("pain", "analgesic", "opioid", "nsaid"),
-  Psychiatry = c("adhd", "alzheimer", "anxiety", "anxiolytic", "anticonvulsant",
-                 "antipsychotic", "attention", "benzodiazepine", "bipolar",
-                 "chorea", "deficit", "dementia", "depression", "epilepsy",
-                 "huntington", "insomnia", "maoi", "mental", "migraine",
-                 "monoclonal", "motor tics", "narcolepsy", "parkinson", "psych",
-                 "psychosis", "restless leg", "schizophrenia", "seizure",
-                 "sleep disorder", "snri", "ssri", "tca", "tremor", "tricyclic"),
-  Pulmonology = c("lung", "pulmonary", "asthma", "copd", "respiratory",
-                  'bronchodilator', 'emphysema', 'ipf', 'cystic fibrosis',
-                  'lung disease', 'lung infection'),
-  Radiology = c("contrast", "radiologic", "imaging"),
-  Rheumatology = c("rheumatoid", "autoimmune", "lupus", "gout", 'sjogren'),
-  Urology = c("urinary", "kidney", "renal", "prostate", "urologic"),
-  Vaccine = c('vaccine'),
-  Dentistry = c("dental", "tooth", "oral", "periodontal"),
-  Otorhinolaryngology = c("ent", "ear", "nose", "throat", "sinus", "otitis"),
-  Vitamin = c("vitamin","deficiency", "supplement", "nutritional", "replacement"),
-  Missing = c('missing')
-  # Other = c(),
-)
-
-
 # Hierarchy Map -----------------------------------------------------------
 
 hierarchical_map <- list(
@@ -98,19 +53,22 @@ hierarchical_map <- list(
     Respiratory_Infections = c("pneumonia", "influenza", "covid", "staph", "mrsa", "strep")
   ),
   Neurology = list(
-    General_Neurology = c("neuro"),
+    General_Neurology = c("neuro" ,'narcolepsy'),
     Seizure_Disorders = c("seizure", "epilepsy"),
     Headache = c("migraine"),
     Neuropathy = c("neuropathy"),
     Demyelinating_Disease = c("multiple sclerosis"),
     Cognitive_Disorders = c("alzheim"),
-    Movement_Disorders = c("parkinson", "motor tics", "restless leg", "dystonia", "ataxia")
+    Movement_Disorders = c("parkinson", "motor tics", "restless leg",
+                           "dystonia", "ataxia", 'Lou Gehrig',
+                           'myasthenia gravis', 'cerebral palsy', 'muscle disorder',
+                           'motor', 'muscle spasms')
   ),
   Obstetrics = list(
-    Pregnancy_Peripartum = c("pregnancy", "postpartum", "obstetric"),
+    Pregnancy_Peripartum = c("pregnancy", "postpartum", "obstetric", 'METHYLERGONOVINE', 'Prenatal'),
     Fertility_Reproduction = c("fertility", "ivf")
   ),
-  Oncology = list(General_Oncology = c("cancer", "tumor", "chemotherapy", "oncology")),
+  Oncology = list(General_Oncology = c("cancer", "tumor", "chemotherapy", "oncology", 'myelogenous leukemia')),
   Ophthalmology = list(General_Ophthalmology = c("eye", "ocular", "glaucoma", "ophthal")),
   Orthopedics = list(
     Musculoskeletal = c("bone", "joint", "musculoskeletal"),
@@ -142,7 +100,7 @@ hierarchical_map <- list(
     Crystal_Arthropathy = c("gout")
   ),
   Urology = list(
-    Urinary_Tract = c("urinary", "urologic"),
+    Urinary_Tract = c("urinary", "urologic", 'bladder'),
     Kidney_Renal = c("kidney", "renal"),
     Prostate = c("prostate")
   ),
@@ -152,6 +110,8 @@ hierarchical_map <- list(
                                              "sinus", "otitis")),
   Vitamin = list(Nutritional_Support = c( "vitamin", "deficiency", "supplement",
                                           "nutritional", "replacement" )),
+  Other = list(Medical_Equipment = c('Gauze', 'Steralization Pad',
+                                     'sodium chloride', 'Saline Solution')),
   Missing = list(Missing = c('missing'))
 )
 
@@ -240,32 +200,6 @@ f_add_hierarchical_class_all <- function(data, text_col) {
     select(-tmp_text, -res)
 }
 
-
-# Classify Drug Use -------------------------------------------------------
-
-f_classify_drug_use <- function(text_vec) {
-  
-  text_vec_lower <- tolower(text_vec)
-  
-  # class name if matched, else NA
-  mapped <- imap(classification_map, function(keywords, class_name) {
-    pattern <- paste(keywords, collapse = "|")
-    str_detect(text_vec_lower, pattern)
-  })
-  
-  # Convert list of logical vectors to a matrix
-  match_matrix <- do.call(cbind, mapped)
-  
-  # Get the first TRUE per row -> corresponding class name
-  apply(match_matrix, 1, function(row) {
-    idx <- which(row)
-    if (length(idx) == 0) {
-      return("Other")
-    } else {
-      return(names(classification_map)[idx[1]])
-    }
-  })
-}
 
 # Compound Annual Growth Rate ---------------------------------------------
 
