@@ -61,7 +61,7 @@ hierarchical_map <- list(
     Cognitive_Disorders = c("alzheim"),
     Movement_Disorders = c("parkinson", "motor tics", "restless leg",
                            "dystonia", "ataxia", 'Lou Gehrig',
-                           'myasthenia gravis', 'cerebral palsy', 'muscle disorder',
+                           'cerebral palsy', 'muscle disorder',
                            'motor', 'muscle spasms')
   ),
   Obstetrics = list(
@@ -96,7 +96,8 @@ hierarchical_map <- list(
   Rheumatology = list(
     Inflammatory_Arthritis = c("rheumatoid", "psoriatic arthritis",
                                "ankylosing spondylitis"),
-    Autoimmune_Systemic = c("autoimmune", "lupus", "vasculitis", 'sjogren'),
+    Autoimmune_Systemic = c("autoimmune", "lupus", "vasculitis", 'sjogren', 
+                            'myasthenia gravis'),
     Crystal_Arthropathy = c("gout")
   ),
   Urology = list(
