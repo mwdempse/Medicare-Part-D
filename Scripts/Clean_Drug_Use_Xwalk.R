@@ -7,14 +7,6 @@ files <- list.files(
   full.names = T,
 )
 
-# List of strings which should be removed for easier processing 
-xwalk_remove <- 'NOTE:  This is a summary and does NOT have all possible information about this product. This information does not assure that this product is safe, effective, or appropriate for you. This information is not individual medical advice and does not substitute for the advice of your health care professional. Always ask your health care professional for complete information about this product and your specific health needs.'
-xwalk_remove2 <- 'This information does not assure that this product is safe, effective, or appropriate for you. This information is not individual medical advice and does not substitute for the advice of your health care professional. Always ask your health care professional for complete information about this product and your specific health needs.'
-xwalk_remove3 <- 'NOTE: This is a summary and does not contain all possible information about this product. For complete information about this product or your specific health needs, ask your healthcare professional. Always seek the advice of your healthcare professional if you have any questions about this product or your medical condition. This information is not intended as individual medical advice and does not substitute for the knowledge and judgment of your healthcare professional.'
-xwalk_remove4 <- 'NOTE: This is a summary and does NOT have all possible information about this product. This information does not assure that this product is safe, effective, or appropriate for you. This information is not individual medical advice and does not substitute for the advice of your health care professional. Always ask your health care professional for complete information about this product and your specific health needs.'
-xwalk_remove5 <- 'NOTE: This is a summary and does NOT have all possible information about this product. This information does not assure that this product is safe, effective, or appropriate for you. This information is not individual medical advice and does not substitute for the advice of your health care professional. Always ask your health care professional for complete information about this product and your specific health needs.'
-xwalk_remove6 <- 'NOTE: This is a summary and does NOT have all possible information about this product.'
-
 # Create load Xwalk data
 for (file in 1:length(files)) {
   # create year of data
@@ -35,14 +27,9 @@ for (file in 1:length(files)) {
 # clean Xwalk
 df_use <- df_all %>% 
   mutate(
-    # remove strings from drug uses which simply add length
-    Drug.Uses = str_remove_all(str_squish(Drug.Uses), xwalk_remove),
-    Drug.Uses = str_remove_all(Drug.Uses, xwalk_remove2),
-    Drug.Uses = str_remove_all(Drug.Uses, xwalk_remove3),
-    Drug.Uses = str_remove_all(Drug.Uses, xwalk_remove4),
-    Drug.Uses = str_remove_all(Drug.Uses, xwalk_remove5),
-    Drug.Uses = str_remove_all(Drug.Uses, xwalk_remove6),
-    Drug.Uses = str_squish(Drug.Uses),
+    # remove all characters after 'NOTE:' strings from drug uses which acts
+    # as a legal notice of the summary not containing all information 
+    Drug.Uses = str_squish(str_remove_all(Drug.Uses, '(?s)NOTE:.*$')),
     # remove stars from brand and generic
     Generic.Name = toupper(str_squish(Generic.Name)),
     Brand.Name = toupper(str_remove_all(str_squish(Brand.Name), "\\*")),
@@ -112,13 +99,15 @@ df_xwalk <- f_add_hierarchical_class_all(df_use, Drug.Uses)
 mis <- df_xwalk %>% filter(is.na(Med_Cat)) %>% group_by(Drug.Uses) %>% 
   summarise(count = n())
 
+# Category counts
 test <- df_xwalk %>% group_by(Med_Cat) %>% 
   summarise(count = n())
+# SubCategory counts
 test2 <- df_xwalk %>% group_by(Med_Sub_Cat) %>% 
   summarise(count = n())
-
+# "Missings" Most are Diabetic Needles and Vitamin related
 mis2 <- df_xwalk %>% filter(Med_Cat == 'Missing')
-
+# Most are medical equipment such as Gauze
 mis3 <- df_xwalk %>% filter(is.na(Med_Cat))
 
 df_xwalk <- df_xwalk %>% select(-c("All_Terms_Matched", "All_Med_Cat", "All_Med_Sub_Cat"))
