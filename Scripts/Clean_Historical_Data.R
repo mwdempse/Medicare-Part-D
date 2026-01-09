@@ -87,14 +87,13 @@ for (file in 1:length(files)) {
 
 df_all <- df_all %>% 
   mutate(
-    Brand.Name = str_squish(Brand.Name),
-    Generic.Name = str_squish(Generic.Name),
-    Brand.Name = str_remove_all(Brand.Name, "\\*"),
-    Manufacturer = str_remove_all(Manufacturer, "\\*"),
+    Generic.Name = toupper(str_squish(Generic.Name)),
+    Brand.Name = toupper(str_remove_all(str_squish(Brand.Name), "\\*")),
+    Manufacturer = toupper(str_squish(str_remove_all(Manufacturer, "\\*"))),
     key = paste(Brand.Name, Generic.Name, sep = "_")
   ) %>%
   rename(
-    Avg_Spend_Dsg = Average.Spending.Per.Dosage.Unit..Weighted.,
+    Avg_Spend_Dsg = `Average.Spending.Per.Dosage.Unit.(Weighted)`,
     Avg_Spend_Clm = Average.Spending.Per.Claim,
     Avg_Spend_Ben = Average.Spending.Per.Beneficiary
   )
